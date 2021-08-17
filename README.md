@@ -1,9 +1,3 @@
-
-
-
-
-
-
 # plot-fun
 
 Some fun with matplotlib and animations. 
@@ -36,7 +30,7 @@ Type: python main.py -h
         This might take a while.
         
 
-https://user-images.githubusercontent.com/43760202/129294774-a98988ef-f4ed-4c15-a8e9-ea6fad9f1ddf.mp4
+https://user-images.githubusercontent.com/43760202/129790294-cc45e41d-30b4-4c89-b7ba-345caf73cc70.mp4
 
      
 ## License
