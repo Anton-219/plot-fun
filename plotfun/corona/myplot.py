@@ -18,43 +18,72 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from .. import plot_help
 from . import get_data
 
-SOURCE_TEXT = """Quellen: Robert-Koch-Institut und GeoBasis-DE / BKG 2021"""
-POS_SOURCE_TEXT = 0.34, 0.005
-POS_DATE = {'x' : 0.1, 'y' : 0.95}
-POS_TITLE = 0.1, 0.96
-POS_INCIDENCE_TOTAL = 0.575, 0.02
 
-locale.setlocale(locale.LC_TIME, 'de_DE')
 
-df_corona, df_total, dshape = get_data.get_corona_data()
+which = 'eu'
+df_corona, df_total, dshape = get_data.get_data(which)
 
 colormap = sns.color_palette("rocket_r", as_cmap=True)
 color_blue = sns.color_palette("colorblind")[0]
 
+if which.lower() == 'ger':
+    locale.setlocale(locale.LC_TIME, 'de_DE')
+    FIGURE_SIZE = (5, 9)
+    
+    SOURCE_TEXT = """Quellen: Robert-Koch-Institut und GeoBasis-DE / BKG 2021"""
+    TITLE_TEXT = "Corona-Pandemie in Deutschland"
+    MAP_TEXT= '7-Tage Inzidenz / Landkreise'
+    POS_MAP_TEXT_Y = -0.056
+    GRAPH_TEXT = '7-Tage Inzidenz / Deutschland'
+    POS_SOURCE_TEXT = 0.34, 0.005
+    POS_DATE = {'x' : 0.1, 'y' : 0.95}
+    POS_TITLE = 0.1, 0.96
+    POS_INCIDENCE_TOTAL = 0.575, 0.02
+    MAP_Y_MARGIN = 0.
+    colorbar_legen_x_ticks = [  0,  60, 120, 180, 240, ">300"]
+    dmax = 300
+elif which.lower() == 'eu':
+    locale.setlocale(locale.LC_TIME, 'en_EN')
+    FIGURE_SIZE = (7, 9)
+    
+    SOURCE_TEXT = """Source: World Health Organization Regional Office for Europe (WHO / Europe) """
+    TITLE_TEXT = "Corona pandemic in Europe / 2020.01.20 - 2021.11.20"
+    MAP_TEXT= '7-day incidence / Regions'
+    POS_MAP_TEXT_Y = -0.056
+    GRAPH_TEXT = '7-day average cases / Europe'
+    POS_SOURCE_TEXT = 0.38, 0.005
+    POS_DATE = {'x' : 0.03, 'y' : 0.94}
+    POS_TITLE = 0.03, 0.95
+    POS_INCIDENCE_TOTAL = 0.7, 0.02
+    MAP_Y_MARGIN = 0.0
+    
+    colorbar_legen_x_ticks = [  0,  80, 160, 240, 320, ">400"]
+    dmax = 400
+else: 
+    NotImplementedError("There are no more possible options then 'ger' and 'eu'.")
+
 dmin = df_corona.min().min()
-dmax = 300
+
 
 def plot_map(ax, val, ):
     global dshape
     ax.clear()
-    ax.set_title('7-Tage Inzidenz / Landkreise', loc='right',
-                 fontdict = dict(fontsize = 10), y = -0.056, color='dimgray')
+    ax.set_title(MAP_TEXT, loc='right',
+                 fontdict = dict(fontsize = 10), y = POS_MAP_TEXT_Y, color='dimgray')
     ax.set_axis_off()
     data = df_corona[val]
     dshape['data'] = data
     dshape.plot(column='data', ax=ax, cmap=colormap, vmin=dmin, vmax=dmax)
-    ax.margins(y=0)
+    ax.margins(y=MAP_Y_MARGIN)
 
 
 def plot_incidence(ax, val):
     ax.clear()
-    # ax.set_title('7-Tage Inzidenz / Deutschland', loc='right',
-    #              fontdict = dict(fontsize = 10), y = -2, color='dimgray')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
 
     data = df_total[:val]
-    data.plot(ax=ax, color=color_blue)
+    data.plot(ax=ax, color=color_blue, xlabel='')
     ax.fill_between(data.index, data, color=color_blue, alpha=0.5)
     ax.margins(y=0)
 
@@ -74,7 +103,7 @@ plot_functions = {'map' : plot_map,
                   }
 
 
-def animation_make(from_date = None, to_date = None, save_name = None, approx=10):
+def animation_make(from_date = None, to_date = None, save_name = None):
     gp = plot_help.GridPlot(table, plot_functions = plot_functions,
                             name_book = {1 : 'map',
                                          2 : 'incidence',
@@ -84,21 +113,19 @@ def animation_make(from_date = None, to_date = None, save_name = None, approx=10
                                          'top':0.9,
                                          'hspace': 0.0},
                             fig_kwargs = dict(constrained_layout=True,
-                                              figsize=(5, 9)),
+                                              figsize=FIGURE_SIZE),
                             )
     # Add the text for the sources.
     gp['fig'].text(*POS_SOURCE_TEXT, SOURCE_TEXT, fontsize=8)
-    gp['fig'].text(*POS_TITLE, "Corona-Pandemie in Deutschland", fontsize=18,
+    gp['fig'].text(*POS_TITLE, TITLE_TEXT, fontsize=18,
                         fontdict={'family' : 'arial'})
-    gp['fig'].text(*POS_INCIDENCE_TOTAL, '7-Tage Inzidenz / Deutschland', 
+    gp['fig'].text(*POS_INCIDENCE_TOTAL, GRAPH_TEXT,
                    fontdict = dict(fontsize = 10), color='dimgray')
     to_save = save_name is not None
-    # if from_date is None:
-    #     from_date = df_corona.columns.min()
-    # if to_date is None:
-    #     to_date = df_corona.columns.max()
-    # date_range = pd.date_range(start=from_date, end=to_date, freq='D')
+    
     date_range = df_total.index
+    if from_date is not None and to_date is not None:
+        date_range = date_range[(date_range >= from_date) & (date_range <= to_date)]
 
     def init_func():
         axins = inset_axes(gp['map'],
@@ -111,7 +138,7 @@ def animation_make(from_date = None, to_date = None, save_name = None, approx=10
                     )
         cbar = gp['fig'].colorbar(mpl.cm.ScalarMappable(cmap=colormap), cax=axins, ticks=[0, 0.2, 0.4, 0.6, 0.8, 1],
                                   orientation='horizontal')
-        cbar.ax.set_xticklabels([  0,  60, 120, 180, 240, ">300"])
+        cbar.ax.set_xticklabels(colorbar_legen_x_ticks)
 
     def anim_update(val, obj, fargs):
         for kf in obj.plot_functions:
@@ -134,9 +161,9 @@ def animation_make(from_date = None, to_date = None, save_name = None, approx=10
 
 def main():
     anim = animation_make(
-        # pd.Timestamp(year=2021, month=3, day=24).tz_localize('utc'),
-        #                   pd.Timestamp(year=2021, month=3, day=28).tz_localize('utc'),
-                          save_name=os.path.join('data', 'corona', 'corona_pandemic_ger.mp4'),
+        # pd.Timestamp(year=2021, month=4, day=1),
+        #                   pd.Timestamp(year=2021, month=4, day=5),
+                          save_name=os.path.join('results', 'corona', 'corona_pandemic_eu.mp4'),
                           )
     return df_corona, dshape, anim
 

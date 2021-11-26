@@ -147,3 +147,16 @@ data/geodata/quellenvermerk_datenlizenz_deutschland.txt
 data/energy/Kraftwerksliste_2021_1.xlsx
 fun_examples
 test.py
+data/geodata/CovidSubntlEURO/CovidSubntlEURO_v3.2.cpg
+data/geodata/CovidSubntlEURO/CovidSubntlEURO_v3.2.dbf
+data/geodata/CovidSubntlEURO/CovidSubntlEURO_v3.2.sbn
+data/geodata/CovidSubntlEURO/CovidSubntlEURO_v3.2.prj
+data/geodata/CovidSubntlEURO/CovidSubntlEURO_v3.2.sbx
+data/geodata/CovidSubntlEURO/CovidSubntlEURO_v3.2.shp
+data/geodata/CovidSubntlEURO/CovidSubntlEURO_v3.2.shx
+data/corona-data/WHOEURO_SubnationalHistory.csv
+results/corona/Kommentar zu EU.txt
+results/corona/attempts/corona_pandemic_eu.mp4
+data/corona-data/france/sp-pe-tb-quot-dep-2021-11-24-19h07.csv
+data/corona-data/france/sidep-note-methodo-270820.pdf
+data/corona-data/EURO_COVID19_SubNationalDataset.csv

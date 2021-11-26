@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 import scipy.ndimage.filters as filters
 from tqdm import tqdm
+from shapely.geometry import Polygon
 
 # DATA_PATH = os.path.join('..', '..', 'data')
 DATA_PATH = 'data'
@@ -77,8 +78,8 @@ def shape():
 
 
 def parse_corona_data():
-    """Loads the csv-files and parses them to a simple and fast-readable format. 
-    Use only for the raw data and do not to plot the graphs with this function. 
+    """Loads the csv-files for Germany and parses them to a simple and fast-readable format.
+    Use only for the raw data and do not to plot the graphs with this function.
     Use get_corona_data for this."""
     corona_dict= dict()
     files = glob.glob(os.path.join(DATA_PATH, 'corona-data', 'counties', '*'))
@@ -123,13 +124,53 @@ def get_corona_data():
 
     df_7days = (df_7days.divide(dshape['EWZ'], axis='index')*100000)
     df_total = df_total/dshape['EWZ'].sum()*100000
-    
+
     df_7days.sort_index(inplace=True)
     df_total.sort_index(inplace=True)
-    
+
     return df_7days, df_total, dshape
 
 
+def get_corona_data_eu():
+    """Reads the files for eu and transforms them to plotable DataFrames. """
+    df = pd.read_csv(os.path.join(DATA_PATH, 'corona-data', 'WHOEURO_SubnationalHistory.csv'))
+    df['Date'] = pd.to_datetime(df['Date'])
+
+    df_total = df.groupby(by='Date').agg(np.sum)['NewCasesRaw']
+    df_total = df_total.rolling(7).sum()/7
+    df_total.fillna(0, inplace=True)
+    df_total = df_total[df_total.index[:-4]]
+
+    df = df[['UID', 'Date', 'Incidence7']].copy()
+
+    # Collect the data of the regions
+    corona_dict = dict()
+    eu_regions = df.groupby(by = 'UID')
+    for name, reg in eu_regions:
+        if name in corona_dict:
+            raise RuntimeError(f'This should absolutely NOT happen. {name} is in corona_dict.')
+        corona_dict[name] = pd.Series(reg['Incidence7'].values, index=reg['Date'])
+    df_corona = pd.DataFrame(corona_dict).T
+    df_corona.fillna(0, inplace=True)
+    df_corona = df_corona[df_corona.columns.sort_values()]
+
+    shape_eu = gpd.read_file(os.path.join(DATA_PATH, 'geodata', 'CovidSubntlEURO'))
+    shape_eu.set_index('UID', verify_integrity=True, inplace=True)
+
+    # Truncate to the european main continent.
+    xmin, ymin, xmax, ymax = [-1.5e6, 4e6, 5e6, 1e7]
+    shape_eu = shape_eu.cx[xmin:xmax, ymin:ymax]
+    polys = gpd.GeoSeries([Polygon([(xmin, ymin), (xmax, ymin), (xmax, ymax), (xmin, ymax)])])
+    pol = gpd.GeoDataFrame(geometry=polys, crs=shape_eu.crs)
+    shape_eu = pol.overlay(shape_eu, how='intersection').set_index(shape_eu.index)
+    return df_corona, df_total, shape_eu
+
+
+def get_data(reg : str):
+    if reg.lower() == 'ger':
+        return get_corona_data()
+    if reg.lower() == 'eu':
+        return get_corona_data_eu()
 # def parse_data():
 #     df_corona = pd.read_excel(PATH_CORONA_DATA, "LK_7-Tage-Inzidenz (fixiert)",
 #                        skiprows = [0, 1, 2, 3, 416, 417, 418, 419, 420])
