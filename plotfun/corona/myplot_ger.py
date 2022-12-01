@@ -26,43 +26,20 @@ df_corona, df_total, dshape = get_data.get_data(which)
 colormap = sns.color_palette("rocket_r", as_cmap=True)
 color_blue = sns.color_palette("colorblind")[0]
 
-# TODO Maybe no fixed numbers (Calculate from the figure)
-if which.lower() == 'ger':
-    locale.setlocale(locale.LC_TIME, 'de_DE')
-    FIGURE_SIZE = (5, 9)
-    
-    SOURCE_TEXT = """Quellen: Robert-Koch-Institut und GeoBasis-DE / BKG 2021"""
-    TITLE_TEXT = "Corona-Pandemie in Deutschland"
-    MAP_TEXT= '7-Tage Inzidenz / Landkreise'
-    POS_MAP_TEXT_Y = -0.056
-    GRAPH_TEXT = '7-Tage Inzidenz / Deutschland'
-    POS_SOURCE_TEXT = 0.34, 0.005
-    POS_DATE = {'x' : 0.1, 'y' : 0.95}
-    POS_TITLE = 0.1, 0.96
-    POS_INCIDENCE_TOTAL = 0.575, 0.02
-    MAP_Y_MARGIN = 0.
-    colorbar_legen_x_ticks = [  0,  60, 120, 180, 240, ">300"]
-    dmax = 300
-elif which.lower() == 'eu':
-    locale.setlocale(locale.LC_TIME, 'en_EN')
-    FIGURE_SIZE = (7, 9)
-    
-    SOURCE_TEXT = """Source: World Health Organization Regional Office for Europe (WHO / Europe) """
-    TITLE_TEXT = "Corona pandemic in Europe / 2020.01.20 - 2021.11.20"
-    MAP_TEXT= '7-day incidence / Regions'
-    POS_MAP_TEXT_Y = -0.056
-    GRAPH_TEXT = '7-day average cases / Europe'
-    POS_SOURCE_TEXT = 0.38, 0.005
-    POS_DATE = {'x' : 0.03, 'y' : 0.94}
-    POS_TITLE = 0.03, 0.95
-    POS_INCIDENCE_TOTAL = 0.7, 0.02
-    MAP_Y_MARGIN = 0.0
-    
-    colorbar_legen_x_ticks = [  0,  80, 160, 240, 320, ">400"]
-    dmax = 400
-else: 
-    NotImplementedError("There are no more possible options then 'ger' and 'eu'.")
-
+locale.setlocale(locale.LC_TIME, 'de_DE')
+FIGURE_SIZE = (5, 9)
+SOURCE_TEXT = """Quellen: Robert-Koch-Institut und GeoBasis-DE / BKG 2021"""
+TITLE_TEXT = "Corona-Pandemie in Deutschland"
+MAP_TEXT= '7-Tage Inzidenz / Landkreise'
+POS_MAP_TEXT_Y = -0.056
+GRAPH_TEXT = '7-Tage Inzidenz / Deutschland'
+POS_SOURCE_TEXT = 0.34, 0.005
+POS_DATE = {'x' : 0.1, 'y' : 0.95}
+POS_TITLE = 0.1, 0.96
+POS_INCIDENCE_TOTAL = 0.575, 0.02
+MAP_Y_MARGIN = 0.
+colorbar_legen_x_ticks = [  0,  60, 120, 180, 240, ">300"]
+dmax = 300
 dmin = df_corona.min().min()
 
 
