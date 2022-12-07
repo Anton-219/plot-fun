@@ -14,10 +14,10 @@ Type: python main.py -h
         Hello :)
         I will make images for the years [2002 2020] and no animation.
         I will save the images as germany_energymix_[year].jpeg.
-<img src = "results/germany_energymix_2002.jpeg"
+<img src = "results/energy/germany_energymix_2002.jpeg"
      style = "float: center; margin-right: 10px;"
      width="200"/>
-<img src = "results/germany_energymix_2020.jpeg"
+<img src = "results/energy/germany_energymix_2020.jpeg"
      style = "float: center; margin-right: 10px;"
      width="200"/> 
      
